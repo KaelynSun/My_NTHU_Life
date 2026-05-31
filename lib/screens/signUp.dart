@@ -48,6 +48,8 @@ class _SignUpState extends State<SignUp> {
         'studentID': id,
         'email': email,
         'createdAt': FieldValue.serverTimestamp(),
+
+        'courses' : {}
       });
 
       if (!mounted) return;

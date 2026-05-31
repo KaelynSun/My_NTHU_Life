@@ -566,7 +566,10 @@ class _HomePage extends StatelessWidget {
           ValueListenableBuilder<int>(
             valueListenable: totalCreditsNotifier,
             builder: (context, credits, child) {
-              return PetDashboardWidget(currentCredits: credits);
+              return PetDashboardWidget(
+                currentCredits: credits,
+                studentID: studentID,
+              );
             },
           ),
         ],

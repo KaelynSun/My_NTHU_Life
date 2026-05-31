@@ -3,8 +3,10 @@ import 'package:my_nthu_life/data/studentData.dart';
 import 'package:my_nthu_life/screens/auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_nthu_life/theme/theme.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // 1. Imported dotenv package
+import 'ai_service.dart';
 
-// 1. Core Firebase packages imported here
+// Core Firebase packages imported here
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart'; 
 
@@ -20,6 +22,17 @@ final totalCreditsNotifier = ValueNotifier<int>(0);
 void main() async {
   // Ensure native bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // 2. Load the .env profile safely before initialization hooks run
+  try {
+    await dotenv.load(fileName: ".env");
+    print("🔑 [.env SECURE] Local environment file loaded successfully!");
+  } catch (e) {
+    print("⚠️ [.env WARNING] Could not find or read .env file: $e");
+  }
+
+  // 3. Initialize the OpenAI client securely
+  AIService().initialize();
   
   try {
     print("📡 [Firebase Test] Attempting connection initialization...");
