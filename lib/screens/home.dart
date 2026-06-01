@@ -178,7 +178,7 @@ class _HomeState extends State<Home> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          ProfileScreen(studentID: widget.studentID),
+                          const ProfileScreen(),
                     ),
                   );
                 },

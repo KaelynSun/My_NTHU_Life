@@ -3,8 +3,12 @@ import 'package:my_nthu_life/data/studentData.dart';
 import 'package:my_nthu_life/screens/auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_nthu_life/theme/theme.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // 1. Imported dotenv package
+import 'package:flutter_dotenv/flutter_dotenv.dart'; 
 import 'ai_service.dart';
+
+// 1. Core State Management Provider imports added here
+import 'package:provider/provider.dart';
+import 'package:my_nthu_life/pet_files/pet_provider.dart'; // Verified provider path
 
 // Core Firebase packages imported here
 import 'package:firebase_core/firebase_core.dart';
@@ -13,17 +17,12 @@ import 'firebase_options.dart';
 var kColorScheme = MaterialTheme.lightScheme();
 var kDarkColorScheme = MaterialTheme.darkHighContrastScheme();
 
-// Global notifier — any widget in the tree can toggle the theme
 final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.dark);
-
-// Any widget can read or write to this to dynamically update Jamil's coins
 final totalCreditsNotifier = ValueNotifier<int>(0);
 
 void main() async {
-  // Ensure native bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 2. Load the .env profile safely before initialization hooks run
   try {
     await dotenv.load(fileName: ".env");
     print("🔑 [.env SECURE] Local environment file loaded successfully!");
@@ -31,35 +30,33 @@ void main() async {
     print("⚠️ [.env WARNING] Could not find or read .env file: $e");
   }
 
-  // 3. Initialize the OpenAI client securely
   AIService().initialize();
   
   try {
     print("📡 [Firebase Test] Attempting connection initialization...");
-    
-    // Initialize Firebase
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-
-    // --- DIAGNOSTIC CONNECTION CHECK ---
     final currentApp = Firebase.app();
     print("---------------------------------------------------------");
     print("🎉 [Firebase SUCCESS] Connection Established Successfully!");
     print("📦 Connected Project ID: ${currentApp.options.projectId}");
-    print("🔑 Application ID: ${currentApp.options.appId}");
     print("---------------------------------------------------------");
-
   } catch (e) {
-    print("---------------------------------------------------------");
-    print("❌ [Firebase ERROR] Failed to connect to backend!");
-    print("⚠️ Error Details: $e");
-    print("---------------------------------------------------------");
+    print("❌ [Firebase ERROR] Failed to connect to backend: $e");
   }
 
-  // Load local asset users & boot UI
   await loadUsers();
-  runApp(const MyApp());
+
+  // 2. Wrap MyApp with MultiProvider so PetProvider is at the root level of the app
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => PetProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -84,44 +81,7 @@ class MyApp extends StatelessWidget {
                 foregroundColor: kDarkColorScheme.onPrimaryContainer,
               ),
             ),
-            textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme)
-                .copyWith(
-                  titleLarge: GoogleFonts.outfit(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
-                  titleMedium: GoogleFonts.outfit(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
-                  titleSmall: GoogleFonts.outfit(
-                    fontSize: 13,
-                    color: Colors.white60.withOpacity(0.55),
-                  ),
-                  displayLarge: GoogleFonts.outfit(
-                    fontSize: 25,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                  bodyMedium: GoogleFonts.outfit(
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
-                  labelMedium: GoogleFonts.outfit(
-                    fontSize: 13,
-                    color: Colors.white38,
-                  ),
-                  labelLarge: GoogleFonts.outfit(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.3,
-                    color: Colors.white,
-                  ),
-                ),
+            textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
           ),
           theme: ThemeData().copyWith(
             colorScheme: kColorScheme,
@@ -138,47 +98,10 @@ class MyApp extends StatelessWidget {
                 backgroundColor: kColorScheme.primaryContainer,
               ),
             ),
-            textTheme: GoogleFonts.outfitTextTheme(ThemeData().textTheme)
-                .copyWith(
-                  titleLarge: GoogleFonts.outfit(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
-                  titleMedium: GoogleFonts.outfit(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
-                  titleSmall: GoogleFonts.outfit(
-                    fontSize: 13,
-                    color: Colors.white60.withOpacity(0.55),
-                  ),
-                  displayLarge: GoogleFonts.outfit(
-                    fontSize: 25,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                  bodyMedium: GoogleFonts.outfit(
-                    fontSize: 14,
-                    color: Colors.white,
-                  ),
-                  labelMedium: GoogleFonts.outfit(
-                    fontSize: 13,
-                    color: Colors.white38,
-                  ),
-                  labelLarge: GoogleFonts.outfit(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.3,
-                    color: Colors.white,
-                  ),
-                ),
+            textTheme: GoogleFonts.outfitTextTheme(ThemeData().textTheme),
           ),
-          themeMode: mode, // driven by the notifier
-          home: const Auth(), // Marked const for optimal widget performance
+          themeMode: mode, 
+          home: const Auth(), 
         );
       },
     );
