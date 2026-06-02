@@ -9,6 +9,8 @@ class StreakPet {
   String rank;
   String title;
   double expMultiplier;
+  List<String> ownedAccessories;
+  String equippedAccessory;
 
   StreakPet({
     required this.id,
@@ -21,6 +23,8 @@ class StreakPet {
     this.rank = 'Bronze',
     this.title = 'Sleepy Egg',
     this.expMultiplier = 1.0,
+    this.ownedAccessories = const [],
+    this.equippedAccessory = '',
   });
 
 
@@ -37,6 +41,8 @@ class StreakPet {
       rank: json['rank'] ?? 'Bronze',
       title: json['title'] ?? 'Sleepy Egg',
       expMultiplier: (json['expMultiplier'] ?? 1.0).toDouble(),
+      ownedAccessories: List<String>.from(json['ownedAccessories'] ?? []),
+      equippedAccessory: json['equippedAccessory'] ?? '',
     );
   }
 
@@ -53,6 +59,8 @@ class StreakPet {
       'rank': rank,
       'title': title,
       'expMultiplier': expMultiplier,
+      'ownedAccessories': ownedAccessories,
+      'equippedAccessory': equippedAccessory,
     };
   }
 
