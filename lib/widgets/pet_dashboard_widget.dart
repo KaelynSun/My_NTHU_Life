@@ -1,11 +1,11 @@
-import 'dart:convert';
+//import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_nthu_life/pet_files/pet_data.dart';
 import 'package:my_nthu_life/services/firestore_services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:shared_preferences/shared_preferences.dart';
 
 class PetDashboardWidget extends StatefulWidget {
   final int currentCredits;
@@ -45,13 +45,24 @@ class _PetDashboardWidgetState
       ownedAccessories: [], // New field for tracking owned accessories
       equippedAccessory: '', // New field for currently equipped accessory
     );
-
+    
+    // Sikka: change sharedpreferences to firestore
+    
+    /*
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setString(
       'user_streak_pet',
       jsonEncode(newPet.toJson()),
     );
+    */
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.studentID)
+        .set({
+      'pet': newPet.toJson(),
+    }, SetOptions(merge: true));
 
     setState(() {
       _currentPet = newPet;
@@ -89,12 +100,21 @@ class _PetDashboardWidgetState
       _currentPet!.ownedAccessories.add(itemName);
     });
 
+    // sikka: ganti sharedpreferences ke firestore
+    /*
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setString(
       'user_streak_pet',
       jsonEncode(_currentPet!.toJson()),
     );
+    */
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.studentID)
+        .set({
+      'pet': _currentPet!.toJson(),
+    }, SetOptions(merge: true));
   }
 
   Future<void> _equipAccessory(String itemName) async {
@@ -104,12 +124,21 @@ class _PetDashboardWidgetState
       _currentPet!.equippedAccessory = itemName;
     });
 
+    // sikka: ganti sharedpreferences ke firestore
+    /*
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setString(
       'user_streak_pet',
       jsonEncode(_currentPet!.toJson()),
     );
+    */
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.studentID)
+        .set({
+      'pet': _currentPet!.toJson(),
+    }, SetOptions(merge: true));
   }
 
   void _showAccessoryShop() {
